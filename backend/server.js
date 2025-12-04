@@ -17,11 +17,13 @@ app.use(helmet());
 app.use(compression());
 
 // Rate Limiting: Max 100 requests per 15 mins
-const limiter = rateLimit({
+
+/*const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100,
   message: { error: "Too many requests, please try again later." },
-});
+});*/
+
 app.use(limiter);
 
 // Allow localhost + Netlify in production
