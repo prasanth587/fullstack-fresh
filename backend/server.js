@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import mysql from "mysql2/promise";
 import helmet from "helmet";
 import compression from "compression";
-import rateLimit from "express-rate-limit";
+//import rateLimit from "express-rate-limit";
 
 dotenv.config({ override: true });
 console.log(">> USING DATABASE_URL =", process.env.DATABASE_URL);
