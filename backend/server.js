@@ -4,18 +4,33 @@ import dotenv from "dotenv";
 import mysql from "mysql2/promise";
 
 dotenv.config();
-console.log(">> USING DATABASE_URL =", process.env.DATABASE_URL);
+console.log(">> USING DATABASE_URL = " , process.env.DATABASE_URL);
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 // CORS: allow frontend origin
+// CORS: allow dev and Netlify origins
+const allowedOrigins = [
+  "http://localhost:5173",
+  process.env.CLIENT_ORIGIN, // Netlify URL from env
+].filter(Boolean); // remove undefined/null
+
 app.use(
   cors({
-    origin: process.env.CLIENT_ORIGIN || "*",
+    origin: (origin, callback) => {
+      // allow no-origin requests (curl, Postman, etc.)
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.log("❌ CORS blocked origin:", origin);
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   })
 );
+
 
 app.use(express.json());
 
@@ -59,24 +74,6 @@ app.post("/api/messages", async (req, res) => {
 });
 
 
-app.get("/api/db-debug", async (req, res) => {
-  try {
-    const [[info]] = await pool.query(
-      "SELECT DATABASE() AS db, @@hostname AS host, @@port AS port"
-    );
-    const [[countRow]] = await pool.query(
-      "SELECT COUNT(*) AS count FROM messages"
-    );
-
-    res.json({
-      dbInfo: info,
-      messagesCount: countRow.count,
-    });
-  } catch (err) {
-    console.error("db-debug error:", err);
-    res.status(500).json({ error: "db debug failed" });
-  }
-});
 
 
 app.get("/api/messages", async (_req, res) => {
